@@ -2,8 +2,11 @@ import React, { useCallback, useReducer, useState } from "react";
 import Button from "react-bootstrap/Button";
 import AddResturant from "./addResturant";
 import ResturantList from "./resturantList";
+import useVisibility from "../costom-hooks/useVisibility";
 
 export const ResturantContext = React.createContext({});
+
+const initialArg = { resturentList: [], filteredList: [] };
 
 function debounce(func, delay) {
   let timeoutId;
@@ -21,10 +24,9 @@ function reducer(state, action) {
   switch (action.type) {
     case "add-resturant":
       const updatedList = [
-        { ...action.value, id: state.resturentList.length+1 },
+        { ...action.value, id: state.resturentList.length + 1 },
         ...state.resturentList,
       ];
-      console.log('updatedList',updatedList)
       return {
         ...state,
         resturentList: updatedList,
@@ -35,18 +37,14 @@ function reducer(state, action) {
       const updatedList = state.resturentList.filter(
         (res) => res.id !== action.value.id
       );
-
-      console.log('updatedList',updatedList)
       return {
         ...state,
         resturentList: updatedList,
         filteredList: updatedList,
       };
     }
-
-    case "edit-resturant":
-      return state.reduce((value, data) => {
-        //use slice
+    case "edit-resturant": {
+      const updatedList = state.resturentList.reduce((value, data) => {
         if (data.id === action.value.id) {
           value.push(action.value);
         } else {
@@ -54,6 +52,12 @@ function reducer(state, action) {
         }
         return value;
       }, []);
+      return {
+        ...state,
+        resturentList: updatedList,
+        filteredList: updatedList,
+      };
+    }
     case "filter":
       if (action.value !== "") {
         const updatedListData = state.resturentList.filter((resturent) =>
@@ -61,24 +65,17 @@ function reducer(state, action) {
         );
         return { ...state, filteredList: updatedListData };
       }
-
       return { ...state, filteredList: state.resturentList };
   }
 }
 
 const Resturant = () => {
-  let initialArg = { resturentList: [], filteredList: [] };
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
+  const [show, handleShow, handleClose] = useVisibility(false);
+  const [editData, updateEditData] = useState({});
   const [state, dispatch] = useReducer(reducer, initialArg);
 
-  const handleChange = (e) => {
-    const { value } = e.target;
-
-    debouncedSearch(value); // Call the debounced search function
+  const handleChange = ({ target: { value } }) => {
+    debouncedSearch(value);
   };
 
   const debouncedSearch = useCallback(
@@ -86,8 +83,17 @@ const Resturant = () => {
     []
   );
 
+  const providerValues = {
+    state,
+    dispatch,
+    resturentList: [],
+    editData,
+    updateEditData,
+    handleShow,
+  };
+
   return (
-    <ResturantContext.Provider value={{ state, dispatch, resturentList: [] }}>
+    <ResturantContext.Provider value={providerValues}>
       <div>
         <div className="d-flex justify-content-between align-items-center p-2 bg-dark">
           <h5 className="text-white">Resturant</h5>
@@ -103,7 +109,7 @@ const Resturant = () => {
           </Button>
         </div>
 
-        <AddResturant show={show} handleClose={handleClose} />
+        {show && <AddResturant show={show} handleClose={handleClose} />}
         <ResturantList />
       </div>
     </ResturantContext.Provider>

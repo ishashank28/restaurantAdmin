@@ -1,134 +1,125 @@
-import React, { useContext, useState } from "react";
-
+import React, { useContext, useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { ResturantContext } from "./resturant";
 
 const initialFormState = {
-    resturantName: "",
-    location: "",
-    description: "",
-  }
+  resturantName: "",
+  location: "",
+  description: "",
+};
 
 function AddResturant({ show, handleClose }) {
-  console.log("check::::", show, handleClose);
-  //   let formData = null;
+  const context = useContext(ResturantContext);
 
-  //   const [name, setName] = useState("");
-  //   const [location, setLocation] = useState("");
-  //   const [description, setDescription] = useState("");
-  //   const [mergedData, setMergedData] = useState([]);
+  const [formData, setFormData] = useState(
+    context.editData ? context.editData : initialFormState
+  );
+  const [errors, setErrors] = useState({});
 
-  //   const onChangeName = (e) => {
-  //     setName(e.target.value);
-  //     console.log(name, "name");
-  //   };
+  const closeModal = () => {
+    context.updateEditData({});
+    setFormData(initialFormState);
+    setErrors({});
+    handleClose();
+  };
 
-  //   const onChangeLocation = (e) => {
-  //     setLocation(e.target.value);
-  //     console.log(location, "location");
-  //   };
-
-  //   const onChangeDescription = (e) => {
-  //     setDescription(e.target.value);
-  //     console.log(description, "description");
-  //   }
-
-  const [formData, setFormData] = useState(initialFormState);
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.resturantName || formData.resturantName.trim() === "") {
+      newErrors.resturantName = "Restaurant Name is required.";
+    }
+    if (!formData.location || formData.location.trim() === "") {
+      newErrors.location = "Location is required.";
+    }
+    return newErrors;
+  };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    // // const formData = {
-    // //   name: name,
-    // //   location:location,
-    // //   description:description
-    // // }
-    // const formData = {
-    //   name,
-    //   location,
-    //   description,
-    // };
-    // setMergedData((prevData) => [...prevData, formData]);
-    // setName("");
-    // setLocation("");
-    // setDescription("");
-    context.dispatch({ type: "add-resturant", value:formData });
-    handleClose();
-    setFormData(initialFormState)
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length === 0) {
+      if (Object.keys(context.editData).length > 0) {
+        context.dispatch({ type: "edit-resturant", value: formData });
+        context.updateEditData({});
+      } else {
+        context.dispatch({ type: "add-resturant", value: formData });
+      }
+      handleClose();
+      setFormData(initialFormState);
+    } else {
+      setErrors(formErrors);
+    }
   };
 
-  const context = useContext(ResturantContext);
-
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={closeModal}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Restro Details</Modal.Title>
+        <Modal.Title>{Object.keys(context.editData).length > 0 ? "Edit" : "Add"} Restaurant Details</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div>
-          <form>
-            <div className="mb-3">
-              <label htmlFor="InputName" className="form-label">
-                Restaurant Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="InputName"
-                aria-describedby="emailHelp"
-                value={formData.resturantName}
-                onChange={(e) =>
-                  setFormData((values) => {
-                    return { ...values, resturantName: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="InputLocation" className="form-label">
-                Location
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="InputLocation"
-                value={formData.location}
-                onChange={(e) =>
-                  setFormData((values) => {
-                    return { ...values, location: e.target.value };
-                  })
-                }
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="FormControlTextarea1" className="form-label" />
+        <form>
+          <div className="mb-3">
+            <label htmlFor="InputName" className="form-label">
+              Restaurant Name
+            </label>
+            <input
+              type="text"
+              className={`form-control ${errors.resturantName ? 'is-invalid' : ''}`}
+              id="InputName"
+              value={formData.resturantName || ""}
+              onChange={(e) =>
+                setFormData((values) => ({
+                  ...values,
+                  resturantName: e.target.value,
+                }))
+              }
+            />
+            {errors.resturantName && (
+              <div className="invalid-feedback">{errors.resturantName}</div>
+            )}
+          </div>
+          <div className="mb-3">
+            <label htmlFor="InputLocation" className="form-label">
+              Location
+            </label>
+            <input
+              type="text"
+              className={`form-control ${errors.location ? 'is-invalid' : ''}`}
+              id="InputLocation"
+              value={formData.location || ""}
+              onChange={(e) =>
+                setFormData((values) => ({
+                  ...values,
+                  location: e.target.value,
+                }))
+              }
+            />
+            {errors.location && (
+              <div className="invalid-feedback">{errors.location}</div>
+            )}
+          </div>
+          <div className="mb-3">
+            <label htmlFor="FormControlTextarea1" className="form-label">
               Description
-              <textarea
-                className="form-control"
-                id="FormControlTextarea1"
-                rows="3"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((values) => {
-                    return { ...values, description: e.target.value };
-                  })
-                }
-              ></textarea>
-            </div>
-          </form>
-
-          {/* <button
-                type="submit"
-                className="btn btn-primary"
-                onClick={onSubmit}
-              >
-                Submit
-              </button>
-            <Card mergedData={mergedData} /> */}
-        </div>
+            </label>
+            <textarea
+              className="form-control"
+              id="FormControlTextarea1"
+              rows="3"
+              value={formData.description || ""}
+              onChange={(e) =>
+                setFormData((values) => ({
+                  ...values,
+                  description: e.target.value,
+                }))
+              }
+            ></textarea>
+          </div>
+        </form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-dark" onClick={handleClose}>
+        <Button variant="outline-dark" onClick={closeModal}>
           Close
         </Button>
         <Button variant="outline-primary" onClick={onSubmit}>
