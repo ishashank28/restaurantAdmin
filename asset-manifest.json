@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ishashank28/restaurantAdmin.git/static/css/main.bcf091fb.css",
+    "main.js": "/ishashank28/restaurantAdmin.git/static/js/main.3500e701.js",
+    "static/js/453.04f727ea.chunk.js": "/ishashank28/restaurantAdmin.git/static/js/453.04f727ea.chunk.js",
+    "index.html": "/ishashank28/restaurantAdmin.git/index.html",
+    "main.bcf091fb.css.map": "/ishashank28/restaurantAdmin.git/static/css/main.bcf091fb.css.map",
+    "main.3500e701.js.map": "/ishashank28/restaurantAdmin.git/static/js/main.3500e701.js.map",
+    "453.04f727ea.chunk.js.map": "/ishashank28/restaurantAdmin.git/static/js/453.04f727ea.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bcf091fb.css",
+    "static/js/main.3500e701.js"
+  ]
+}
